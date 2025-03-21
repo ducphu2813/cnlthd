@@ -5,6 +5,7 @@ using APIApplication.Model;
 using APIApplication.Repository.Interface;
 using APIApplication.Service.Interfaces;
 using AutoMapper;
+using System.ComponentModel.DataAnnotations;
 
 namespace APIApplication.Service;
 
@@ -56,30 +57,76 @@ public class InvoiceDetailService : IInvoiceDetailService
 
     public async Task<InvoiceDetailDTO> Add(SaveInvoiceDetailDTO invoiceDetail)
     {
-        //chuyển từ DTO về Model
+        // Map DTO to Model
         var invoiceDetailModel = _mapper.Map<InvoiceDetail>(invoiceDetail);
-        
-        //lấy id product và id invoice ra kiểm tra xem có tồn tại không
+
+        // Validate Product and Invoice existence
         var product = await _productRepository.GetById(invoiceDetail.ProductId);
-        
-        if(product == null)
+        if (product == null)
         {
             _logger.LogError("Product not found");
             throw new ProductNotFoundException(invoiceDetail.ProductId);
         }
-        
+
         var invoice = await _invoiceRepository.GetById(invoiceDetail.InvoiceId);
-        
-        if(invoice == null)
+        if (invoice == null)
         {
             _logger.LogError("Invoice not found");
             throw new InvoiceNotFoundException(invoiceDetail.InvoiceId);
         }
-        
-        await _invoiceDetailRepository.Add(invoiceDetailModel);
-        
-        //chuyển từ Model về DTO
-        return _mapper.Map<InvoiceDetailDTO>(invoiceDetailModel);
+
+        // Check stock availability early
+        if (invoiceDetailModel.Quantity > product.Quantity)
+        {
+            _logger.LogError("Not a valid amount");
+            throw new ValidateException("Quantity", invoiceDetailModel.Quantity);
+        }
+
+        if (invoice.Status == InvoiceStatus.Cancelled || invoice.Status == InvoiceStatus.Completed)
+        {
+            _logger.LogError("Invoice is paid or cancelled");
+            throw new ValidationException("Cannot modify a cancelled or completed invoice."); // Use ValidationException
+        }
+
+        // Check for existing detail and update or add
+        var detail = await _invoiceDetailRepository.GetByInvoiceAndProductIdAsync(invoiceDetail.InvoiceId, invoiceDetail.ProductId);
+        InvoiceDetail updatedDetail;
+
+        if (detail != null)
+        {
+            int newQuantity = detail.Quantity + invoiceDetailModel.Quantity;
+            if (newQuantity > product.Quantity)
+            {
+                _logger.LogError("Not a valid amount");
+                throw new ValidateException("Quantity", invoiceDetailModel.Quantity);
+            }
+
+            // Update existing detail in-place
+            detail.Quantity = newQuantity;
+            detail.Total += invoiceDetailModel.Quantity * product.Price; // Incremental update
+            updatedDetail = await _invoiceDetailRepository.Update(detail.Id, detail);
+            _logger.LogInformation("Updated ProductId: {0}, Quantity: {1}", detail.ProductId, detail.Quantity);
+
+            // Update product stock
+            product.Quantity -= invoiceDetailModel.Quantity;
+            await _productRepository.Update(product.Id, product);
+        }
+        else
+        {
+            // Set necessary fields for new detail
+            invoiceDetailModel.Id = Guid.NewGuid();
+            invoiceDetailModel.InvoiceId = invoice.Id;
+            invoiceDetailModel.Total = invoiceDetailModel.Quantity * product.Price;
+            updatedDetail = await _invoiceDetailRepository.Add(invoiceDetailModel);
+            _logger.LogInformation("Added ProductId: {0}, Quantity: {1}", updatedDetail.ProductId, updatedDetail.Quantity);
+
+            // Update product stock
+            product.Quantity -= invoiceDetailModel.Quantity;
+            await _productRepository.Update(product.Id, product);
+        }
+
+        // Return mapped DTO
+        return _mapper.Map<InvoiceDetailDTO>(updatedDetail);
     }
 
     public async Task<InvoiceDetailDTO> Update(Guid id, SaveInvoiceDetailDTO invoiceDetail)

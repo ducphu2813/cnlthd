@@ -27,6 +27,7 @@ public class InvoiceDetailController : ControllerBase
     }
     
     //lấy chi tiết hóa đơn theo invoice id
+    //bỏ
     [HttpGet]
     [Route("/invoice-id/{invoiceId}")]
     public async Task<ActionResult<IEnumerable<InvoiceDetailDTO>>> GetInvoiceDetailByInvoiceId(Guid invoiceId)

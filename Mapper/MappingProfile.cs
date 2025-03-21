@@ -29,7 +29,9 @@ public class MappingProfile : Profile
         //mapper ủa invoice detail
         CreateMap<InvoiceDetail, SaveInvoiceDetailDTO>().ReverseMap();
         CreateMap<InvoiceDetail, InvoiceDetailDTO>()
-            .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product));
+            .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product))
+            .ForMember(dest => dest.Quantity, opt => opt.MapFrom(scr => scr.Quantity))
+            .ForMember(dest => dest.Total, opt => opt.MapFrom(src => src.Total));
     }
     
 }

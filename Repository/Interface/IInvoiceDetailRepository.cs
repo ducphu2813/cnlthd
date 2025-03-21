@@ -7,4 +7,6 @@ public interface IInvoiceDetailRepository : IRepository<InvoiceDetail>
     
     //lấy tất cả invoice detail theo invoice id
     Task<IEnumerable<InvoiceDetail>> GetByInvoiceId(Guid invoiceId);
+    Task<bool> IsProductInInvoiceAsync(Guid invoiceId, Guid productId);
+    Task<InvoiceDetail> GetByInvoiceAndProductIdAsync(Guid invoiceId, Guid productId);
 }

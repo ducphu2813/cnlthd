@@ -33,6 +33,7 @@ public class InvoiceController : ControllerBase
     public async Task<ActionResult<InvoiceDTO>> GetInvoiceById(Guid id)
     {
         var invoice = await _invoiceService.GetById(id);
+        Console.WriteLine("Hallo Im Emu Otori: ", invoice.ToString);
         
         if (invoice == null)
         {

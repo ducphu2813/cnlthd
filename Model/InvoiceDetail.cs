@@ -1,5 +1,7 @@
 ﻿namespace APIApplication.Model;
 
+
+
 public class InvoiceDetail
 {
     public Guid Id { get; set; }
@@ -11,4 +13,7 @@ public class InvoiceDetail
     //khóa ngoại đến bảng Product
     public Guid ProductId { get; set; }
     public Product Product { get; set; }
+
+    public int Quantity { get; set; }
+    public double Total { get; set; }
 }

@@ -29,5 +29,16 @@ public class InvoiceDetailRepository : BaseRepository<InvoiceDetail>, IInvoiceDe
             .Include(d => d.Invoice)
             .ToListAsync();
     }
-    
+
+    public async Task<bool> IsProductInInvoiceAsync(Guid invoiceId, Guid productId)
+    {
+        return await _context.InvoiceDetails
+            .AnyAsync(d => d.InvoiceId == invoiceId && d.ProductId == productId);
+    }
+
+    public async Task<InvoiceDetail> GetByInvoiceAndProductIdAsync(Guid invoiceId, Guid productId)
+    {
+        return await _context.InvoiceDetails
+            .FirstOrDefaultAsync(d => d.InvoiceId == invoiceId && d.ProductId == productId);
+    }
 }
