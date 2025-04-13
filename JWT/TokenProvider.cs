@@ -58,7 +58,7 @@ public class TokenProvider(IConfiguration configuration)
         //đối với JsonWebTokenHandler thì ta tạo jwt từ token descriptor
         //còn đối với JwtSecurityTokenHandler thì ta tạo jwt từ 1 instance của JwtSecurityToken
         
-        //tạo jwt từ token descriptor
+        //tạo jwt từ token descriptor dùng JsonWebTokenHandler
         string token = handler.CreateToken(tokenDescriptor);
         
         return token;

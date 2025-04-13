@@ -34,6 +34,6 @@ public class AuthService : IAuthService
 
     public Task<string> Register(RegisterDTO registerDTO)
     {
-        throw new NotImplementedException();
+        throw new System.NotImplementedException();
     }
 }

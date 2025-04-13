@@ -16,15 +16,24 @@ public class JWTMiddleware
     {
         
         // Danh sách endpoint bỏ qua xác thực
-        var bypassEndpoints = new List<string> { "/api/auth/login", "/api/auth/register" };
-        
+        var bypassEndpoints = new List<string> { "/api/auth/login"
+                                                , "/api/auth/register"
+                                                , "/api/product"
+        };
         // Nếu request thuộc các endpoint này thì bỏ qua xác thực
         if (bypassEndpoints.Contains(context.Request.Path.Value?.ToLower()))
         {
             await _next(context);
             return;
         }
-
+        
+        //bỏ qua xác thực cho tất cả endpoint của hangfire
+        if(context.Request.Path.Value.Contains("/hangfire"))
+        {
+            await _next(context);
+            return;
+        }
+        
         var authenticationService = context.RequestServices.GetRequiredService<IAuthenticationService>();
         var result = await authenticationService.AuthenticateAsync(context, JwtBearerDefaults.AuthenticationScheme);
 

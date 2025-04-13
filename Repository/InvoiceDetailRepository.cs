@@ -30,4 +30,14 @@ public class InvoiceDetailRepository : BaseRepository<InvoiceDetail>, IInvoiceDe
             .ToListAsync();
     }
     
+    //tìm invoice detail theo product id và invoice id
+    public async Task<InvoiceDetail> GetByProductIdAndInvoiceId(Guid productId, Guid invoiceId)
+    {
+        return await _context.InvoiceDetails
+            .Where(d => d.ProductId == productId && d.InvoiceId == invoiceId)
+            .Include(d => d.Product)
+            .Include(d => d.Invoice)
+            .FirstOrDefaultAsync();
+    }
+    
 }

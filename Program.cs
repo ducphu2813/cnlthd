@@ -8,6 +8,9 @@ using APIApplication.Repository;
 using APIApplication.Repository.Interface;
 using APIApplication.Service;
 using APIApplication.Service.Interfaces;
+using APIApplication.Settings;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -24,7 +27,22 @@ public class Program
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
 
-        // Add services to the container.
+        // Add services to the asp.net container.
+        
+        //cấu hình hangfire
+        builder.Services.AddHangfire(config =>
+        {
+            config.UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings() //sử dụng serializer mặc định
+                //cấu hình sử dụng database lưu trữ job
+                .UsePostgreSqlStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
+        });
+
+        //cấu hình hangfire server
+        builder.Services.AddHangfireServer();
+        
+        //đăng ký JobTest
+        builder.Services.AddScoped<IJobTestService, JobTestService>();
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -37,6 +55,12 @@ public class Program
         
         //đăng ký token provider
         builder.Services.AddSingleton<TokenProvider>();
+        
+        //đăng ký email settings
+        builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+        
+        //đăng ký cloudinary settings
+        builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
         
         //đăng ký repository
         builder.Services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
@@ -51,6 +75,11 @@ public class Program
         builder.Services.AddScoped<IInvoiceService, InvoiceService>();
         builder.Services.AddScoped<IInvoiceDetailService, InvoiceDetailService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<IPhotoService, PhotoService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
+        
+        //đăng ký VnPay service
+        builder.Services.AddScoped<IVnPayService, VnPayService>();
         
         //dang ký AutoMapper
         builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -59,7 +88,7 @@ public class Program
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(o =>
             {
-                o.RequireHttpsMetadata = false;
+                o.RequireHttpsMetadata = false; //bỏ qua yêu cầu https
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
                     IssuerSigningKey =
@@ -146,9 +175,22 @@ public class Program
         //thêm authentication
         app.UseAuthentication();
 
+        app.Use(async (context, next) =>
+        {
+            // Bỏ qua xác thực cho các file tĩnh của Hangfire Dashboard
+            if (context.Request.Path.StartsWithSegments("/hangfire"))
+            {
+                context.User = new System.Security.Claims.ClaimsPrincipal();
+            }
+            await next();
+        });
+        
         app.UseMiddleware<JWTMiddleware>();
         
         app.UseAuthorization();
+
+        //thêm hangfire dashboard
+        app.UseHangfireDashboard();
 
         app.MapControllers();
 

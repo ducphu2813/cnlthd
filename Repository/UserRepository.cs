@@ -18,4 +18,6 @@ public class UserRepository : BaseRepository<Users>, IUserRepository
         return await _context.Users.FirstOrDefaultAsync(x => x.Email == email && x.Password == password);
     }
     
+    //tìm user bằng email
+    
 }

@@ -76,7 +76,38 @@ public class InvoiceDetailController : ControllerBase
         return Ok(await _invoiceDetailService.Update(id, invoiceDetail));
     }
     
-    //xóa chi tiết hóa đơn
+    [HttpPost]
+    [Route("update-quantity")]
+    public async Task<ActionResult<InvoiceDetailDTO>> UpdateQuantity([FromBody] UpdateQuantityDTO request)
+    {
+        try
+        {
+            var result = await _invoiceDetailService.UpdateQuantity(request.InvoiceId, request.ProductId, request.QuantityChange);
+            return Ok(result);
+        }
+        catch (System.Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    // Xóa sản phẩm khỏi hóa đơn
+    [HttpDelete("remove-product/{invoiceId}/{productId}")]
+    public async Task<ActionResult<bool>> RemoveProductFromInvoice(Guid invoiceId, Guid productId)
+    {
+        try
+        {
+            var result = await _invoiceDetailService.RemoveProductFromInvoice(invoiceId, productId);
+            return Ok(result);
+        }
+        catch (System.Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    
+    //xóa chi tiết hóa đơn theo id
     [HttpDelete]
     [Route("delete/{id}")]
     public async Task<ActionResult<bool>> DeleteInvoiceDetail(Guid id)
@@ -84,7 +115,7 @@ public class InvoiceDetailController : ControllerBase
         return Ok(await _invoiceDetailService.Remove(id));
     }
     
-    //xóa chi tiết hóa đơn theo id hóa đơn
+    //xóa các chi tiết hóa đơn theo id hóa đơn
     [HttpDelete]
     [Route("delete-by-invoice-id/{invoiceId}")]
     public async Task<ActionResult<bool>> DeleteInvoiceDetailByInvoiceId(Guid invoiceId)
@@ -92,9 +123,4 @@ public class InvoiceDetailController : ControllerBase
         //tạm thời chưa xử lý
         return Ok(true);
     }
-    
-    
-    
-    
-    
 }

@@ -11,10 +11,13 @@ public class AuthController : ControllerBase
 {
     
     private readonly IAuthService _authService;
+    private readonly IEmailService _emailService;
     
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService
+                            , IEmailService emailService)
     {
         _authService = authService;
+        _emailService = emailService;
     }
     
     //đăng nhập
@@ -31,5 +34,16 @@ public class AuthController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+    }
+    
+    //đăng ký
+    [HttpPost]
+    [Route("register")]
+    [AllowAnonymous]
+    public async Task<ActionResult<string>> Register([FromBody] RegisterDTO registerDTO)
+    {
+        //test gửi mail
+        await _emailService.SendEmailAsync("gameservice4me@gmail.com", "Test", "Test gửi từ API");
+        return Ok();
     }
 }

@@ -10,6 +10,8 @@ public class DatabaseContext : DbContext
     {
     }
     
+    
+    //database set cho từng model
     public DbSet<Product> Products { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<InvoiceDetail> InvoiceDetails { get; set; }
