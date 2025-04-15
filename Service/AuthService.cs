@@ -1,4 +1,5 @@
 ﻿using APIApplication.DTO.Auth;
+using APIApplication.DTO.Users;
 using APIApplication.JWT;
 using APIApplication.Repository.Interface;
 using APIApplication.Service.Interfaces;
@@ -17,7 +18,7 @@ public class AuthService : IAuthService
         _tokenProvider = tokenProvider;
     }
     
-    public async Task<string> Login(LoginDTO loginDTO)
+    public async Task<Dictionary<string, object>> Login(LoginDTO loginDTO)
     {
         
         //tìm theo email và password
@@ -29,7 +30,19 @@ public class AuthService : IAuthService
         }
         
         //tạo token
-        return _tokenProvider.Create(user);
+        var token = _tokenProvider.Create(user);
+
+        UserDTO userDTO = new UserDTO()
+        {
+            Id = user.Id,
+            Email = user.Email
+        };
+        
+        return new Dictionary<string, object>()
+        {
+            {"token", token},
+            {"user", userDTO}
+        };
     }
 
     public Task<string> Register(RegisterDTO registerDTO)

@@ -11,5 +11,7 @@ public class InvoiceDTO
     //tổng tiền
     public double? TotalAmount { get; set; }
     
+    public string Status { get; set; }
+    
     public List<InvoiceDetailDTO> InvoiceDetails { get; set; }
 }
