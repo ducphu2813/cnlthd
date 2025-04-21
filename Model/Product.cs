@@ -6,7 +6,8 @@ public class Product
     public string? Name { get; set; }
     public string? Description { get; set; }
     public double? Price { get; set; }
-    
+    public int? Quantity { get; set; }
+
     //quan hệ tới bảng InvoiceDetail
     public List<InvoiceDetail> InvoiceDetails { get; set; }
 }

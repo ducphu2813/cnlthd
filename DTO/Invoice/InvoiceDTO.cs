@@ -7,6 +7,7 @@ public class InvoiceDTO
 {
     public Guid Id { get; set; }
     public UserDTO Users { get; set; }
-    
+    public bool Status { get; set; }
+
     public List<InvoiceDetailDTO> InvoiceDetails { get; set; }
 }

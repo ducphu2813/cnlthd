@@ -15,8 +15,8 @@ public class JWTMiddleware
     public async Task Invoke(HttpContext context)
     {
         
-        // Danh sách endpoint bỏ qua xác thực
-        var bypassEndpoints = new List<string> { "/api/auth/login", "/api/auth/register" };
+        // Danh sách endpoint bỏ qua xác thựcnote
+        var bypassEndpoints = new List<string> { "/api/auth/login", "/api/auth/register", "/api/product" };
         
         // Nếu request thuộc các endpoint này thì bỏ qua xác thực
         if (bypassEndpoints.Contains(context.Request.Path.Value?.ToLower()))
