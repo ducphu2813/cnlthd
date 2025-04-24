@@ -51,6 +51,22 @@ public class Program
         
         //đăng ký JobTest
         builder.Services.AddScoped<IJobTestService, JobTestService>();
+        // fix lỗi cors
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(
+                "AllowLocalhost",
+                policy =>
+                {
+                    policy
+                        .WithOrigins("http://localhost:5173") // Cho phép origin của frontend
+                        .AllowAnyMethod() // Cho phép tất cả HTTP methods (GET, POST, v.v.)
+                        .AllowAnyHeader(); // Cho phép tất cả headers
+                }
+            );
+        });
+
+        // Add services to the container.
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -170,7 +186,7 @@ public class Program
                             }));
                         }
                         return Task.CompletedTask;
-                    },
+                    }
                 };
             });
         

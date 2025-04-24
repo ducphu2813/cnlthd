@@ -9,4 +9,5 @@ public class ProductDTO
     
     //đường dẫn ảnh
     public string? ImageUrl { get; set; }
+    public int? Quantity { get; set; }
 }

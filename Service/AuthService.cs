@@ -21,19 +21,26 @@ public class AuthService : IAuthService
         _tokenProvider = tokenProvider;
         _mapper = mapper;
     }
-    
+
     public async Task<Dictionary<string, object>> Login(LoginDTO loginDTO)
     {
         
         //tìm theo email và password
         var user = await _userRepository.FindByEmailAndPassword(loginDTO.Email, loginDTO.Password);
-        
-        if(user == null)
+
+        if (user == null)
         {
             throw new System.Exception("Email hoặc mật khẩu không đúng");
         }
-        
+
+        var userDTO = _mapper.Map<UserDTO>(user);
+
         //tạo token
+        var token = _tokenProvider.Create(user);
+
+        var result = new Dictionary<string, object> { { "user", userDTO }, { "token", token } };
+
+        return result;
         var token = _tokenProvider.Create(user);
 
         //dùng mapper
@@ -49,6 +56,6 @@ public class AuthService : IAuthService
 
     public Task<string> Register(RegisterDTO registerDTO)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }

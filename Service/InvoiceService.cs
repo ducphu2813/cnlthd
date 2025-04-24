@@ -10,18 +10,17 @@ public class InvoiceService : IInvoiceService
 {
     private readonly IinvoiceRepository _invoiceRepository;
     private readonly IMapper _mapper;
-    
-    public InvoiceService(IinvoiceRepository invoiceRepository
-                            , IMapper mapper)
+
+    public InvoiceService(IinvoiceRepository invoiceRepository, IMapper mapper)
     {
         _invoiceRepository = invoiceRepository;
         _mapper = mapper;
     }
-    
+
     public async Task<List<InvoiceDTO>> GetAll()
     {
         var invoices = await _invoiceRepository.GetAll();
-        
+
         //chuyển từ List<Model> về List<DTO>
         return _mapper.Map<List<InvoiceDTO>>(invoices);
     }
@@ -29,7 +28,7 @@ public class InvoiceService : IInvoiceService
     public async Task<InvoiceDTO> GetById(Guid id)
     {
         var invoice = await _invoiceRepository.GetById(id);
-        
+
         //chuyển từ Model về DTO
         return _mapper.Map<InvoiceDTO>(invoice);
     }
@@ -38,9 +37,9 @@ public class InvoiceService : IInvoiceService
     {
         //chuyển từ DTO về Model
         var invoiceModel = _mapper.Map<Invoice>(invoice);
-        
+
         await _invoiceRepository.Add(invoiceModel);
-        
+
         //chuyển từ Model về DTO
         return _mapper.Map<InvoiceDTO>(invoiceModel);
     }
@@ -49,12 +48,12 @@ public class InvoiceService : IInvoiceService
     {
         //chuyển từ DTO về Model
         var invoiceModel = _mapper.Map<Invoice>(invoice);
-        
+
         //set id cũ cho obj
         invoiceModel.Id = id;
-        
+
         await _invoiceRepository.Update(id, invoiceModel);
-        
+
         //chuyển từ Model về DTO
         return _mapper.Map<InvoiceDTO>(invoiceModel);
     }
@@ -62,5 +61,14 @@ public class InvoiceService : IInvoiceService
     public async Task<bool> Remove(Guid id)
     {
         return await _invoiceRepository.Remove(id);
+    }
+
+    // lấy hóa đơn theo user id
+    public async Task<List<InvoiceDTO>> GetByUserId(Guid userId)
+    {
+        var invoices = await _invoiceRepository.GetByUserId(userId);
+
+        //chuyển từ List<Model> về List<DTO>
+        return _mapper.Map<List<InvoiceDTO>>(invoices);
     }
 }

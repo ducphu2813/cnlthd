@@ -28,7 +28,7 @@ public class AuthController : ControllerBase
     [HttpPost]
     [Route("login")]
     [AllowAnonymous]
-    public async Task<ActionResult<string>> Login([FromBody] LoginDTO loginDTO)
+    public async Task<ActionResult<Dictionary<string, object>>> Login([FromBody] LoginDTO loginDTO)
     {
         try
         {

@@ -5,29 +5,27 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace APIApplication.Controllers;
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class InvoiceController : ControllerBase
 {
-    
     private readonly IInvoiceService _invoiceService;
-    
+
     public InvoiceController(IInvoiceService invoiceService)
     {
         _invoiceService = invoiceService;
     }
-    
+
     //lấy tất cả các hóa đơn
     [HttpGet]
     public async Task<ActionResult<IEnumerable<InvoiceDTO>>> GetInvoices()
     {
         //lấy danh sách hóa đơn(DTO)
         var invoices = await _invoiceService.GetAll();
-        
+
         return Ok(invoices);
     }
-    
+
     //lấy hóa đơn theo id
     [HttpGet]
     [Route("{id}")]
@@ -35,15 +33,30 @@ public class InvoiceController : ControllerBase
     public async Task<ActionResult<InvoiceDTO>> GetInvoiceById(Guid id)
     {
         var invoice = await _invoiceService.GetById(id);
-        
+
         if (invoice == null)
         {
             return NotFound();
         }
-        
+
         return Ok(invoice);
     }
-    
+
+    // lấy hóa đơn theo user id
+    [HttpGet]
+    [Route("user/{userId}")]
+    public async Task<ActionResult<IEnumerable<InvoiceDTO>>> GetInvoicesByUserId(Guid userId)
+    {
+        var invoices = await _invoiceService.GetByUserId(userId);
+
+        if (invoices == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(invoices);
+    }
+
     //thêm hóa đơn
     [HttpPost]
     [Route("add")]
@@ -51,7 +64,7 @@ public class InvoiceController : ControllerBase
     {
         return Ok(await _invoiceService.Add(invoice));
     }
-    
+
     //cập nhật hóa đơn
     [HttpPut]
     [Route("update/{id}")]
@@ -59,7 +72,7 @@ public class InvoiceController : ControllerBase
     {
         return Ok(await _invoiceService.Update(id, invoice));
     }
-    
+
     //xóa hóa đơn
     [HttpDelete]
     [Route("delete/{id}")]
@@ -67,5 +80,4 @@ public class InvoiceController : ControllerBase
     {
         return Ok(await _invoiceService.Remove(id));
     }
-    
 }

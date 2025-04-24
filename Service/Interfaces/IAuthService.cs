@@ -6,7 +6,7 @@ public interface IAuthService
 {
     //đắng nhập
     Task<Dictionary<string, object>> Login(LoginDTO loginDTO);
-    
-    //đăng ký 
+
+    //đăng ký
     Task<string> Register(RegisterDTO registerDTO);
 }

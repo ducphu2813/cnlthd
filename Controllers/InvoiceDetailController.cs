@@ -115,7 +115,7 @@ public class InvoiceDetailController : ControllerBase
         return Ok(await _invoiceDetailService.Remove(id));
     }
     
-    //xóa các chi tiết hóa đơn theo id hóa đơn
+    //xóa chi tiết hóa đơn theo id hóa đơn
     [HttpDelete]
     [Route("delete-by-invoice-id/{invoiceId}")]
     public async Task<ActionResult<bool>> DeleteInvoiceDetailByInvoiceId(Guid invoiceId)
@@ -123,4 +123,9 @@ public class InvoiceDetailController : ControllerBase
         //tạm thời chưa xử lý
         return Ok(true);
     }
+    
+    
+    
+    
+    
 }
