@@ -1,6 +1,8 @@
 ﻿using APIApplication.DTO.Users;
+using APIApplication.Exception;
 using APIApplication.Service.Interfaces;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIApplication.Controllers;
@@ -67,23 +69,41 @@ public class UserController : ControllerBase
         return Ok(await _userService.GetAll());
     }
     
+    //lấy tất cả user theo role
+    [HttpGet]
+    [Route("role/{role}")]
+    [Authorize(Roles = "ADMIN")]
+    public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsersByRole([FromRoute] string role)
+    {
+        var users = await _userService.FindByRole(role);
+        if (users == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(users);
+    }
+    
     //lấy user theo id
     [HttpGet]
     [Route("{id}")]
     public async Task<ActionResult<UserDTO>> GetUser([FromRoute] Guid id)
     {
-        var user = await _userService.GetById(id);
-        if (user == null)
+        try
         {
-            return NotFound();
+            var user = await _userService.GetById(id);
+            return Ok(user);
         }
-
-        return Ok(user);
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
     
     //thêm user
     [HttpPost]
     [Route("add")]
+    [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<UserDTO>> AddUser([FromBody] SaveUserDTO user)
     {
         return Ok(await _userService.Add(user));
@@ -92,7 +112,7 @@ public class UserController : ControllerBase
     //cập nhật user
     [HttpPut]
     [Route("update/{id}")]
-    public async Task<ActionResult<UserDTO>> UpdateUser(Guid id, [FromBody] SaveUserDTO user)
+    public async Task<ActionResult<UserDTO>> UpdateUser([FromRoute] Guid id, [FromBody] SaveUserDTO user)
     {
         return Ok(await _userService.Update(id, user));
     }
@@ -100,7 +120,7 @@ public class UserController : ControllerBase
     //xóa user
     [HttpDelete]
     [Route("delete/{id}")]
-    public async Task<ActionResult<bool>> DeleteUser(Guid id)
+    public async Task<ActionResult<bool>> DeleteUser([FromRoute] Guid id)
     {
         return Ok(await _userService.Remove(id));
     }

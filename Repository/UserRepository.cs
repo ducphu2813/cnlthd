@@ -18,6 +18,10 @@ public class UserRepository : BaseRepository<Users>, IUserRepository
         return await _context.Users.FirstOrDefaultAsync(x => x.Email == email && x.Password == password);
     }
     
-    //tìm user bằng email
+    //tìm user theo role
+    public async Task<List<Users>> FindByRole(string role)
+    {
+        return await _context.Users.Where(x => x.Role == role).ToListAsync();
+    }
     
 }

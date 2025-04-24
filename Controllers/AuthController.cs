@@ -1,5 +1,6 @@
 ﻿using APIApplication.DTO.Auth;
 using APIApplication.Service.Interfaces;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,12 +13,15 @@ public class AuthController : ControllerBase
     
     private readonly IAuthService _authService;
     private readonly IEmailService _emailService;
+    private readonly IBackgroundJobClient _backgroundJobClient;
     
     public AuthController(IAuthService authService
-                            , IEmailService emailService)
+                            , IEmailService emailService
+                            , IBackgroundJobClient backgroundJobClient)
     {
         _authService = authService;
         _emailService = emailService;
+        _backgroundJobClient = backgroundJobClient;
     }
     
     //đăng nhập
@@ -42,8 +46,12 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<string>> Register([FromBody] RegisterDTO registerDTO)
     {
-        //test gửi mail
-        await _emailService.SendEmailAsync("gameservice4me@gmail.com", "Test", "Test gửi từ API");
+        //test gửi mail ta sẽ đưa vào background job theo kiểu fire and forget
+        _backgroundJobClient.Enqueue(
+            () => _emailService.SendEmailAsync(registerDTO.Email, 
+                "Đăng ký tài khoản thành công"
+                , "Chúc mừng bạn đã đăng ký tài khoản thành công"));
+        
         return Ok();
     }
 }

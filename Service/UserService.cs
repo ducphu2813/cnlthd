@@ -1,4 +1,5 @@
 ﻿using APIApplication.DTO.Users;
+using APIApplication.Exception;
 using APIApplication.Model;
 using APIApplication.Repository.Interface;
 using APIApplication.Service.Interfaces;
@@ -30,6 +31,11 @@ public class UserService : IUserService
     public async Task<UserDTO> GetById(Guid id)
     {
         var user = await _userRepository.GetById(id);
+        
+        if (user == null)
+        {
+            throw new NotFoundException($"Không tìm thấy người dùng với ID = {id}");
+        }
         
         //chuyển từ Model về DTO
         return _mapper.Map<UserDTO>(user);
@@ -63,5 +69,14 @@ public class UserService : IUserService
     public async Task<bool> Remove(Guid id)
     {
         return await _userRepository.Remove(id);
+    }
+    
+    //tìm user theo role
+    public async Task<List<UserDTO>> FindByRole(string role)
+    {
+        var users = await _userRepository.FindByRole(role);
+        
+        //chuyển từ List<Model> về List<DTO>
+        return _mapper.Map<List<UserDTO>>(users);
     }
 }

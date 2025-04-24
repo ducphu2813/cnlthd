@@ -1,9 +1,13 @@
-﻿using APIApplication.Context;
+﻿using System.Text.Json;
+using APIApplication.Context;
 using APIApplication.DTO;
 using APIApplication.Model;
 using APIApplication.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace APIApplication.Controllers;
 
@@ -15,25 +19,54 @@ public class ProductController : ControllerBase
     
     private readonly IProductService _productService;
     private readonly IPhotoService _photoService;
+    private readonly IDistributedCache _cache;
     
     //inject logging
     private readonly ILogger<ProductController> _logger;
     
     public ProductController(IProductService productService
                             , IPhotoService photoService
-                            , ILogger<ProductController> logger)
+                            , ILogger<ProductController> logger
+                            , IDistributedCache cache)
     {
         _productService = productService;
         _photoService = photoService;
         _logger = logger;
+        _cache = cache;
     }
     
     //lấy tất cả các sản phẩm
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
     {
+        
+        var cacheKey = "products";
+        var cachedProducts = await _cache.GetStringAsync(cacheKey);
+        
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+        
+        //kiểm tra xem đã có cache chưa
+        if (cachedProducts != null)
+        {
+            //nếu có cache thì trả về cache
+            _logger.LogInformation("Lấy sản phẩm từ cache");
+            return Ok(cachedProducts);
+        }
+        
+        //nếu chưa có cache thì lấy từ database
+        _logger.LogInformation("Lấy sản phẩm từ database");
         //lấy danh sách sản phẩm(DTO)
         var products = await _productService.GetAll();
+        //lưu vào cache
+        var serializedData = JsonSerializer.Serialize(products, options);
+        var cacheOptions = new DistributedCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(10)); // Cache 10 phút
+        
+        await _cache.SetStringAsync(cacheKey, serializedData, cacheOptions);
         
         return Ok(products);
     }
@@ -56,7 +89,8 @@ public class ProductController : ControllerBase
     //thêm sản phẩm
     [HttpPost]
     [Route("add")]
-    public async Task<ActionResult<ProductDTO>> AddProduct(SaveProductDTO product)
+    [Authorize(Roles = "ADMIN")]
+    public async Task<ActionResult<ProductDTO>> AddProduct([FromBody] SaveProductDTO product)
     {
         string imageUrl = null;
         
@@ -75,6 +109,7 @@ public class ProductController : ControllerBase
     //cập nhật sản phẩm
     [HttpPut]
     [Route("update/{id}")]
+    [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ProductDTO>> UpdateProduct(Guid id, SaveProductDTO product)
     {
         string imageUrl = null;

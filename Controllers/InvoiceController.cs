@@ -1,5 +1,6 @@
 ﻿using APIApplication.DTO.Invoice;
 using APIApplication.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIApplication.Controllers;
@@ -30,6 +31,7 @@ public class InvoiceController : ControllerBase
     //lấy hóa đơn theo id
     [HttpGet]
     [Route("{id}")]
+    [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<InvoiceDTO>> GetInvoiceById(Guid id)
     {
         var invoice = await _invoiceService.GetById(id);

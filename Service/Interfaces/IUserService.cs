@@ -10,4 +10,7 @@ public interface IUserService
     Task<UserDTO> Add(SaveUserDTO obj);
     Task<UserDTO> Update(Guid id, SaveUserDTO obj);
     Task<bool> Remove(Guid id);
+    
+    //tìm user theo role
+    Task<List<UserDTO>> FindByRole(string role);
 }

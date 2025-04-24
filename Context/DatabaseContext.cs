@@ -17,6 +17,8 @@ public class DatabaseContext : DbContext
     public DbSet<InvoiceDetail> InvoiceDetails { get; set; }
     public DbSet<Users> Users { get; set; }
     
+    public DbSet<ChatMessage> ChatMessages { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         
@@ -43,6 +45,7 @@ public class DatabaseContext : DbContext
             .HasMany(x => x.InvoiceDetails)
             .WithOne(x => x.Product)
             .HasForeignKey(x => x.ProductId);
+        
     }
     
 }

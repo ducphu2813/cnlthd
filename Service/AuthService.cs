@@ -3,6 +3,7 @@ using APIApplication.DTO.Users;
 using APIApplication.JWT;
 using APIApplication.Repository.Interface;
 using APIApplication.Service.Interfaces;
+using AutoMapper;
 
 namespace APIApplication.Service;
 
@@ -10,12 +11,15 @@ public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly TokenProvider _tokenProvider;
+    private readonly IMapper _mapper;
     
     public AuthService(IUserRepository userRepository
-                        , TokenProvider tokenProvider)
+                        , TokenProvider tokenProvider
+                        , IMapper mapper)
     {
         _userRepository = userRepository;
         _tokenProvider = tokenProvider;
+        _mapper = mapper;
     }
     
     public async Task<Dictionary<string, object>> Login(LoginDTO loginDTO)
@@ -32,11 +36,9 @@ public class AuthService : IAuthService
         //tạo token
         var token = _tokenProvider.Create(user);
 
-        UserDTO userDTO = new UserDTO()
-        {
-            Id = user.Id,
-            Email = user.Email
-        };
+        //dùng mapper
+        //chuyển từ Model về DTO
+        var userDTO = _mapper.Map<UserDTO>(user);
         
         return new Dictionary<string, object>()
         {
