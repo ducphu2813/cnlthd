@@ -51,6 +51,7 @@ public class Program
         
         //đăng ký JobTest
         builder.Services.AddScoped<IJobTestService, JobTestService>();
+        
         // fix lỗi cors
         builder.Services.AddCors(options =>
         {
@@ -189,17 +190,6 @@ public class Program
                     }
                 };
             });
-        
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("AllowAll", policy =>
-            {
-                policy.WithOrigins("http://127.0.0.1:5500") // đúng origin của HTML
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials(); // <- Quan trọng cho SignalR
-            });
-        });
 
         var app = builder.Build();
         
@@ -215,7 +205,7 @@ public class Program
         app.UseMiddleware<ExceptionMiddleware>();
         
         //thêm cors ==> disable csrf
-        app.UseCors("AllowAll");
+        app.UseCors("AllowLocalhost");
         
         //thêm authentication
         app.UseAuthentication();

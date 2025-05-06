@@ -14,13 +14,7 @@ public interface IInvoiceDetailService
     Task<bool> RemoveProductFromInvoice(Guid invoiceId, Guid productId);
     
     Task<bool> Remove(Guid id);
-
-    // tăng số lượng sản phẩm
-    Task<InvoiceDetailDTO> IncreaseQuantity(Guid id);
-
-    // // giảm số lượng sản phẩm
-    Task<InvoiceDetailDTO> DecreaseQuantity(Guid id);
-
+    
     //lấy ra danh sách chi tiết hóa đơn theo id hóa đơn
     Task<List<InvoiceDetailDTO>> GetByInvoiceId(Guid invoiceId);
 }

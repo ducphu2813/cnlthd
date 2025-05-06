@@ -90,11 +90,34 @@ public class VnPayService : IVnPayService
         return paymentUrl;
     }
 
-    public PaymentResponseDTO PaymentExecute(IQueryCollection collections)
+    public async Task<PaymentResponseDTO> PaymentExecute(IQueryCollection collections)
     {
         var pay = new VnPayLibrary();
         var response = 
             pay.GetFullResponseData(collections, _configuration["VnPay:HashSecret"]);
+        
+        // lấy id của invoice cập nhật trạng thái
+        var invoiceId = Guid.Parse(response.InvoiceId);
+
+        var invoice = await _invoiceRepository.GetById(invoiceId);
+        
+        if(invoice == null)
+        {
+            _logger.LogError("Invoice not found with ID: {InvoiceId}", invoiceId);
+            return response;
+        }
+        
+        try
+        {
+            invoice.Status = "PAID";
+            _logger.LogInformation("Cập nhật trạng thái Invoice thành công");
+            await _invoiceRepository.Update(invoiceId, invoice);
+            _logger.LogInformation("Lưu vào db thành công");
+        }
+        catch (System.Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi khi cập nhật trạng thái Invoice");
+        }
 
         return response;
     }

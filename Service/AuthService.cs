@@ -33,14 +33,6 @@ public class AuthService : IAuthService
             throw new System.Exception("Email hoặc mật khẩu không đúng");
         }
 
-        var userDTO = _mapper.Map<UserDTO>(user);
-
-        //tạo token
-        var token = _tokenProvider.Create(user);
-
-        var result = new Dictionary<string, object> { { "user", userDTO }, { "token", token } };
-
-        return result;
         var token = _tokenProvider.Create(user);
 
         //dùng mapper

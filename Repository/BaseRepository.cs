@@ -5,8 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APIApplication.Repository;
 
-public class BaseRepository<TEntity> : IRepository<TEntity>
-    where TEntity : class
+public class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : class
 {
     protected readonly DatabaseContext _context;
 

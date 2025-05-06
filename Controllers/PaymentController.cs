@@ -29,10 +29,10 @@ public class PaymentController : ControllerBase
     //xử lý sau khi thanh toán xong
     [HttpPost]
     [Route("handle-payment-result")]
-    public ActionResult<string> PaymentResult()
+    public async Task<ActionResult<string>> PaymentResult()
     {
         
-        var result = _vnPayService.PaymentExecute(HttpContext.Request.Query);
+        var result = await _vnPayService.PaymentExecute(HttpContext.Request.Query);
         
         return Ok(result);
     }
